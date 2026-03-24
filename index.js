@@ -49,7 +49,8 @@ const activitySchema = new mongoose.Schema({
   firstLogin: { type: String },
   lastLogin: { type: String },
   firstView: { type: String },
-  lastView: { type: String }
+  lastView: { type: String },
+  stalls: { type: [String], default: [] }
 }
 ,
 {
@@ -107,7 +108,7 @@ app.post("/api/user", async (req, res) => {
 });
 
 app.post("/api/user/activity", async (req, res) => {
-  const { email, loginTime, viewTime } = req.body;
+  const { email, loginTime, viewTime,stall } = req.body;
 
   (async () => {
     try {
@@ -133,6 +134,13 @@ app.post("/api/user/activity", async (req, res) => {
         }
         await activity.save()
       }
+if (stall) {
+  await Activity.updateOne(
+    { email },
+    { $addToSet: { stalls: stall } }
+  );
+}
+
     } catch (err) {
       console.error("Activity update : ", err.message);
     }
