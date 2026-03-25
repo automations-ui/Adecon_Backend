@@ -3,6 +3,9 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import axios from "axios";
+import cookieParser from "cookie-parser";
+import jwt from 'jsonwebtoken'
+
 dotenv.config();
 
 const app = express();
@@ -13,6 +16,7 @@ const uri=process.env.MONGO_URI
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser())
 
 async function connectDB() {
   try {
@@ -79,17 +83,42 @@ function getISTTime() {
     .replace(",", "");
 }
 
+function authentication (req, res, next)  {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({
+        status: "error",
+        message: "No token exists",
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = {
+      email: decoded.email,
+    };
+
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      status: "error",
+      message: err?.message,
+    });
+  }
+};
 app.post("/api/user", async (req, res) => {
   const { email } = req.body;
 
   try {
     const existing = await User.findOne({ email }).lean();
     if (existing) {
-      return res.json({ status: "success", message: "User already exists", email });
+      return res.status(409).json({ status: "success", message: "User already exists", email });
     }
 
    await User.create({ email });
-    res.json({
+    res.status(201).json({
       status: "success",
       message: "User created",
       email,
@@ -99,8 +128,9 @@ app.post("/api/user", async (req, res) => {
   }
 });
 
-app.post("/api/user/activity", async (req, res) => {
-  const { email, loginTime, viewTime,stall } = req.body;
+app.post("/api/user/activity", authentication,async (req, res) => {
+  const { loginTime, viewTime,stall } = req.body;
+  const {email}=req.user
 
   (async () => {
        const time = getISTTime();
@@ -133,7 +163,7 @@ app.post("/api/user/activity", async (req, res) => {
       }
   })();
 
-  return res.json({ status: "success", message: "Activity updated",email });
+  return res.status(202).json({ status: "success", message: "Activity updated",email });
 });
 
 app.post("/api/user/status", async (req, res) => {
@@ -143,7 +173,20 @@ app.post("/api/user/status", async (req, res) => {
     const user = await User.findOne({ email }).lean();
 
     if (user) {
-      return res.json({
+      const token = jwt.sign(
+        { email }, 
+        process.env.JWT_SECRET, 
+        { expiresIn:432000  }
+      );
+      
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 432000000
+      });
+
+      return res.status(200).json({
         status: "success",
         message: "User exists",
         email,
@@ -159,23 +202,35 @@ app.post("/api/user/status", async (req, res) => {
       const paymentStatus = response?.data?.paymentStatus;
 
       if (paymentStatus === "payment done") {
-        return res.json({
+          const token = jwt.sign(
+        { email }, 
+        process.env.JWT_SECRET, 
+        { expiresIn:432000  }
+      );
+      
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 432000000
+      });
+        return res.status(200).json({
           status: "success",
           message: "User exists",
           email,
         });
       }
 
-      return res.json({
+      return res.status(404).json({
         status: "success",
         message: "No User exists",
       });
 
     } catch (externalErr) {
 
-      return res.json({
+      return res.status(500).json({
         status: "error",
-        error:externalErr?.message ,
+        message:externalErr?.message ,
       });
     }
 
@@ -187,8 +242,15 @@ app.post("/api/user/status", async (req, res) => {
   }
 });
 
+app.get("/api/auth/status", authentication, (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message:'User authenticated',
+    email: req.user.email,
+  });
+});
 app.get("/", (req, res) => {
-  res.send("Om Ganeshaay Namah"+"Memory Usage : "+process.memoryUsage()+"Memory Available : "+process.availableMemory());
+  res.status(200).send("Om Ganeshaay Namah"+"Memory Usage : "+process.memoryUsage()+"Memory Available : "+process.availableMemory());
 });
 
 app.listen(PORT, () => {
