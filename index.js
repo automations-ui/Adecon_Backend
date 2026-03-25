@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-
+import axios from "axios";
 dotenv.config();
 
 const app = express();
@@ -61,17 +61,6 @@ const activitySchema = new mongoose.Schema({
 
 const Activity = mongoose.models.Activity || mongoose.model("Activity", activitySchema);
 
-const querySchema = new mongoose.Schema({
-  email: {type: String,index:true},
-  query: { type: String },
-},
-{
-  timestamps:true,
-  strict:false
-});
-
-const Query = mongoose.models.Query || mongoose.model("Query", querySchema);
-
 function getISTTime() {
   return new Date()
     .toLocaleString("en-IN", {
@@ -96,14 +85,14 @@ app.post("/api/user", async (req, res) => {
       return res.json({ status: "success", message: "User already exists", email });
     }
 
-    const newUser = await User.create({ email });
+   await User.create({ email });
     res.json({
       status: "success",
       message: "User created",
-      email: newUser.email,
+      email,
     });
   } catch (err) {
-    res.status(500).json({ status: "error", message:err.message });
+   return res.status(500).json({ status: "error", message:err.message });
   }
 });
 
@@ -134,36 +123,20 @@ app.post("/api/user/activity", async (req, res) => {
         }
         await activity.save()
       }
-if (stall) {
-  await Activity.updateOne(
-    { email },
-    { $addToSet: { stalls: stall } }
-  );
-}
+
+      if (stall) {
+        await Activity.updateOne(
+          { email },
+          { $addToSet: { stalls: stall } }
+        );
+      }
 
     } catch (err) {
-      console.error("Activity update : ", err.message);
+      return  res.status(500).json({ status: "error", message:err.message }); 
     }
   })();
 
-  res.json({ status: "success", message: "Activity updated",email });
-});
-
-
-app.post("/api/user/query", async (req, res) => {
-  const { email, query } = req.body;
-
-  (async () => {
-    try {
-
-      await Query.create({ email, query });
-      
-    } catch (err) {
-      console.error("Query creation : ", err.message);
-    }
-  })();
-
-  res.json({ status: "success",message:"Query created",email });
+  return res.json({ status: "success", message: "Activity updated",email });
 });
 
 app.post("/api/user/status", async (req, res) => {
@@ -171,21 +144,49 @@ app.post("/api/user/status", async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).lean();
-    if(user){
-    res.json({
-      status: "success",
-      message:"User exists",
-      email
-    });
+
+    if (user) {
+      return res.json({
+        status: "success",
+        message: "User exists",
+        email,
+      });
     }
-    else{
-        res.json({
-      status: "success",
-      message:"No User exists"
-    });
+
+    try {
+      const response = await axios.post(
+        "https://sapi.onference.in/UsersApi/checkPaymentStatus",
+        { email }
+      );
+
+      const paymentStatus = response?.data?.paymentStatus;
+
+      if (paymentStatus === "payment done") {
+        return res.json({
+          status: "success",
+          message: "User exists",
+          email,
+        });
+      }
+
+      return res.json({
+        status: "success",
+        message: "No User exists",
+      });
+
+    } catch (externalErr) {
+
+      return res.json({
+        status: "error",
+        error:externalErr?.message ,
+      });
     }
+
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    return res.status(500).json({
+      status: "error",
+      message: err?.message,
+    });
   }
 });
 
