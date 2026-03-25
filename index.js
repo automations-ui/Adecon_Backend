@@ -10,6 +10,7 @@ const PORT = process.env.PORT
 const appName=process.env.APP_NAME
 const dbName=process.env.DB_NAME
 const uri=process.env.MONGO_URI
+
 app.use(cors());
 app.use(express.json());
 
