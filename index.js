@@ -39,7 +39,31 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     index: true,
-  }
+  },
+  fullname:{
+    type:String,
+    trim:true
+  },
+mobileno:{
+  type:String,
+  trim:true
+},
+type:{
+  type:String,
+  trim:true
+},
+city:{
+  type:String,
+  trim:true
+},
+state:{
+  type:String,
+  trim:true
+},
+country:{
+  type:String,
+  trim:true
+}
 },
 {
 timestamps:true,
@@ -107,7 +131,7 @@ function authentication (req, res, next)  {
   }
 };
 app.post("/api/user", async (req, res) => {
-  const { email } = req.body;
+  const { email,fullname,mobileno,city,country,state } = req.body;
 
   try {
     const existing = await User.findOne({ email }).lean();
@@ -115,7 +139,7 @@ app.post("/api/user", async (req, res) => {
       return res.status(409).json({ status: "success", message: "User already exists", email });
     }
 
-   await User.create({ email });
+   await User.create({ email,fullname,mobileno,city,country,state });
     res.status(201).json({
       status: "success",
       message: "User created",
