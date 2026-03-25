@@ -22,9 +22,7 @@ async function connectDB() {
   try {
     await mongoose.connect(uri, {
       appName,
-      dbName,
-      maxPoolSize: 25,   
-      minPoolSize: 3,
+      dbName
     });
     console.log("MongoDB connection Successfull");
   } catch (err) {
