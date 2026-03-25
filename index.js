@@ -17,7 +17,9 @@ async function connectDB() {
   try {
     await mongoose.connect(uri, {
       appName,
-      dbName
+      dbName,
+      maxPoolSize: 25,   
+      minPoolSize: 3,
     });
     console.log("MongoDB connection Successfull");
   } catch (err) {
@@ -100,8 +102,6 @@ app.post("/api/user/activity", async (req, res) => {
   const { email, loginTime, viewTime,stall } = req.body;
 
   (async () => {
-    try {
-
        const time = getISTTime();
       const update = { $set: {}, $setOnInsert: {} };
 
@@ -130,10 +130,6 @@ app.post("/api/user/activity", async (req, res) => {
           { $addToSet: { stalls: stall } }
         );
       }
-
-    } catch (err) {
-      return  res.status(500).json({ status: "error", message:err.message }); 
-    }
   })();
 
   return res.json({ status: "success", message: "Activity updated",email });
@@ -191,7 +187,7 @@ app.post("/api/user/status", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Om Ganeshaay Namah");
+  res.send("Om Ganeshaay Namah"+"Memory Usage : "+process.memoryUsage()+"Memory Available : "+process.availableMemory());
 });
 
 app.listen(PORT, () => {
