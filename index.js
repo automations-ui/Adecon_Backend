@@ -250,7 +250,7 @@ app.get("/api/auth/status", authentication, (req, res) => {
   });
 });
 app.get("/", (req, res) => {
-  res.status(200).send("Om Ganeshaay Namah"+"Memory Usage : "+process.memoryUsage()+"Memory Available : "+process.availableMemory());
+  res.status(200).send("Om Ganeshaay Namah");
 });
 
 app.listen(PORT, () => {
