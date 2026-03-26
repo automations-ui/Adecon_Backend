@@ -211,7 +211,7 @@ app.post("/api/user/status", async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).lean();
-
+const {fullname,mobileno,city,country,state}=user
     if (user) {
       const token = jwt.sign(
         { email }, 
@@ -228,8 +228,14 @@ app.post("/api/user/status", async (req, res) => {
 
       return res.status(200).json({
         status: "success",
-        message: "User exists",
-        email,
+        message: {
+          email,
+          fullname,
+          mobileno,
+          city,
+          state,
+          country
+        }
       });
     }
 
@@ -240,7 +246,7 @@ app.post("/api/user/status", async (req, res) => {
       );
 
       const paymentStatus = response?.data?.paymentStatus;
-
+      const {fullname,mobileno,city,country,state} = response.data.userData[0]
       if (paymentStatus === "payment done") {
           const token = jwt.sign(
         { email }, 
@@ -256,8 +262,14 @@ app.post("/api/user/status", async (req, res) => {
       });
         return res.status(200).json({
           status: "success",
-          message: "User exists",
+          message: {
           email,
+          fullname,
+          mobileno,
+          city,
+          state,
+          country
+          }
         });
       }
 
