@@ -15,7 +15,7 @@ const dbName=process.env.DB_NAME
 const uri=process.env.MONGO_URI
 
 app.use(cors({
-  origin: ['https://adecon.onrender.com','https://adecon-admin.vercel.app',' https://locust-welcomed-promptly.ngrok-free.app'],
+  origin: ['https://adecon.onrender.com','https://adecon-admin.vercel.app','https://locust-welcomed-promptly.ngrok-free.app'],
   credentials: true
 }));
 app.use(express.json());
