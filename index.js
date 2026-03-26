@@ -159,6 +159,15 @@ app.post("/api/user", async (req, res) => {
   }
 });
 
+app.get('/api/activity/all',async(req,res)=>{
+  try{
+  const activities=await Activity.find({}).lean()
+  return res.status(200).json({status:'success',message:activities})
+  }catch(err){
+    return res.status(500).json({ status: "error", message:err.message });
+  }
+})
+
 app.post("/api/user/activity", authentication,async (req, res) => {
   const { loginTime, viewTime,stall } = req.body;
   const {email}=req.user
