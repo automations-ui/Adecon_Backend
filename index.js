@@ -14,7 +14,10 @@ const appName=process.env.APP_NAME
 const dbName=process.env.DB_NAME
 const uri=process.env.MONGO_URI
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://adecon.onrender.com','https://adecon-admin.vercel.app'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser())
 
