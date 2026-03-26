@@ -140,7 +140,7 @@ app.get('/api/user/all',async(req,res)=>{
   }
 })
 app.post("/api/user", async (req, res) => {
-  const { email,fullname,mobileno,city,country,state } = req.body;
+  const { email,fullname,mobileno,city,country,state,type } = req.body;
 
   try {
     const existing = await User.findOne({ email }).lean();
@@ -148,7 +148,7 @@ app.post("/api/user", async (req, res) => {
       return res.status(409).json({ status: "success", message: "User already exists", email });
     }
 
-   await User.create({ email,fullname,mobileno,city,country,state });
+   await User.create({ email,fullname,mobileno,city,country,state,type });
     res.status(201).json({
       status: "success",
       message: "User created",
