@@ -182,7 +182,7 @@ app.post("/api/user/activity", authentication,async (req, res) => {
       if (loginTime) {
        update.$set.lastLogin = time;
        update.$setOnInsert.firstLogin = time;
-        Activity.findOneAndUpdate(
+       await Activity.findOneAndUpdate(
         { email },
         update,
         { upsert: true }
@@ -199,7 +199,7 @@ app.post("/api/user/activity", authentication,async (req, res) => {
       }
 
       if (stall) {
-         Activity.updateOne(
+        await Activity.updateOne(
           { email },
           { $addToSet: { stalls: stall } }
         );
