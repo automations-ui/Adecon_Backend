@@ -214,8 +214,9 @@ app.post("/api/user/status", async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).lean();
-const {fullname,mobileno,city,country,state}=user
+
     if (user) {
+      const {fullname,mobileno,city,country,state}=user
       const token = jwt.sign(
         { email }, 
         process.env.JWT_SECRET, 
