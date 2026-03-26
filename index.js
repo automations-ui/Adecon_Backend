@@ -171,6 +171,16 @@ app.get('/api/activity/all',async(req,res)=>{
   }
 })
 
+app.post("/api/auth/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none"
+  });
+
+  return res.status(200).json({status:'success', message: "User Logged Out" });
+});
+
 app.post("/api/user/activity", authentication,async (req, res) => {
   const { loginTime, viewTime,stall } = req.body;
   console.log(req.user)
