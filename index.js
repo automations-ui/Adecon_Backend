@@ -176,14 +176,13 @@ app.post("/api/user/activity", authentication,async (req, res) => {
   console.log(req.user)
   const {email}=req.user
 
-  (async () => {
        const time = getISTTime();
       const update = { $set: {}, $setOnInsert: {} };
 
       if (loginTime) {
        update.$set.lastLogin = time;
        update.$setOnInsert.firstLogin = time;
-       await Activity.findOneAndUpdate(
+        Activity.findOneAndUpdate(
         { email },
         update,
         { upsert: true }
@@ -200,12 +199,11 @@ app.post("/api/user/activity", authentication,async (req, res) => {
       }
 
       if (stall) {
-        await Activity.updateOne(
+         Activity.updateOne(
           { email },
           { $addToSet: { stalls: stall } }
         );
       }
-  })();
 
   return res.status(202).json({ status: "success", message: "Activity updated",email });
 });
