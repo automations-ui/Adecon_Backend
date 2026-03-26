@@ -130,6 +130,15 @@ function authentication (req, res, next)  {
     });
   }
 };
+
+app.get('/api/user/all',async(req,res)=>{
+  try{
+  const users=await User.find({}).lean()
+  return res.status(200).json({status:'success',message:users})
+  }catch(err){
+    return res.status(500).json({ status: "error", message:err.message });
+  }
+})
 app.post("/api/user", async (req, res) => {
   const { email,fullname,mobileno,city,country,state } = req.body;
 
