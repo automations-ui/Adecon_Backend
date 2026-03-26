@@ -124,7 +124,7 @@ function authentication (req, res, next)  {
     req.user = {
       email: decoded.email,
     };
-
+console.log(req.user.email)
     next();
   } catch (err) {
     return res.status(401).json({
@@ -173,6 +173,7 @@ app.get('/api/activity/all',async(req,res)=>{
 
 app.post("/api/user/activity", authentication,async (req, res) => {
   const { loginTime, viewTime,stall } = req.body;
+  console.log(req.user)
   const {email}=req.user
 
   (async () => {
@@ -250,8 +251,9 @@ app.post("/api/user/status", async (req, res) => {
       );
 
       const paymentStatus = response?.data?.paymentStatus;
-      const {fullname,mobileno,city,country,state} = response.data.userData[0]
+      
       if (paymentStatus === "payment done") {
+        const {fullname,mobileno,city,country,state} = response.data.userData[0]
           const token = jwt.sign(
         { email }, 
         process.env.JWT_SECRET, 
