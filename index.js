@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import axios from "axios";
 import cookieParser from "cookie-parser";
-import jwt from 'jsonwebtoken'
+//import jwt from 'jsonwebtoken'
 
 dotenv.config();
 
@@ -107,7 +107,7 @@ function getISTTime() {
     })
     .replace(",", "");
 }
-
+/*
 function authentication (req, res, next)  {
   try {
     const token = req.cookies.token;
@@ -133,7 +133,7 @@ console.log(req.user.email)
     });
   }
 };
-
+*/
 app.get('/api/user/all',async(req,res)=>{
   try{
   const users=await User.find({}).lean()
@@ -170,7 +170,7 @@ app.get('/api/activity/all',async(req,res)=>{
     return res.status(500).json({ status: "error", message:err.message });
   }
 })
-
+/*
 app.post("/api/auth/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -181,11 +181,9 @@ app.post("/api/auth/logout", (req, res) => {
 
   return res.status(200).json({status:'success', message: "User Logged Out" });
 });
-
-app.post("/api/user/activity", authentication,async (req, res) => {
-  const { loginTime, viewTime,stall } = req.body;
-  console.log(req.user)
-  const {email}=req.user
+*/
+app.post("/api/user/activity",async (req, res) => {
+  const { email,loginTime, viewTime,stall } = req.body;
 
        const time = getISTTime();
       const update = { $set: {}, $setOnInsert: {} };
@@ -227,7 +225,8 @@ app.post("/api/user/status", async (req, res) => {
 
     if (user) {
       const {fullname,mobileno,city,country,state}=user
-      const token = jwt.sign(
+
+/*      const token = jwt.sign(
         { email }, 
         process.env.JWT_SECRET, 
         { expiresIn:432000  }
@@ -240,7 +239,7 @@ app.post("/api/user/status", async (req, res) => {
         path:'/',
         maxAge: 432000000
       });
-
+*/
       return res.status(200).json({
         status: "success",
         message: {
@@ -264,7 +263,9 @@ app.post("/api/user/status", async (req, res) => {
       
       if (paymentStatus === "payment done") {
         const {fullname,mobileno,city,country,state} = response.data.userData[0]
-          const token = jwt.sign(
+         
+        /*
+        const token = jwt.sign(
         { email }, 
         process.env.JWT_SECRET, 
         { expiresIn:432000  }
@@ -277,6 +278,7 @@ app.post("/api/user/status", async (req, res) => {
         path:'/',
         maxAge: 432000000
       });
+      */
         return res.status(200).json({
           status: "success",
           message: {
@@ -310,14 +312,15 @@ app.post("/api/user/status", async (req, res) => {
     });
   }
 });
-
-app.get("/api/auth/status", authentication, (req, res) => {
+/*
+app.get("/api/auth/status", (req, res) => {
   res.status(200).json({
     status: "success",
     message:'User authenticated',
     email: req.user.email,
   });
 });
+*/
 app.get("/", (req, res) => {
   res.status(200).send("Om Ganeshaay Namah");
 });
