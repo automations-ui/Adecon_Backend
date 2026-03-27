@@ -175,6 +175,7 @@ app.post("/api/auth/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
+    path:'/',
     sameSite: "none"
   });
 
@@ -236,6 +237,7 @@ app.post("/api/user/status", async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
+        path:'/',
         maxAge: 432000000
       });
 
@@ -272,6 +274,7 @@ app.post("/api/user/status", async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
+        path:'/',
         maxAge: 432000000
       });
         return res.status(200).json({
